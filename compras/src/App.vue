@@ -1,16 +1,15 @@
 <template>
   <q-layout view="hHh lpR fFf">
-
-    <!-- 🔹 Barra superior -->
+    <!-- 🔹 Header -->
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title class="text-h5">
           🛒 FuturoShop
         </q-toolbar-title>
 
-        <!-- ❤️ Corazón con notificación -->
+        <!-- ❤️ Corazón con animación -->
         <div class="heart-notify q-ml-md">
-          <q-icon name="favorite" size="xl"/>
+          <q-icon name="favorite" size="xl" class="heart-anim" />
           <span v-if="totalItems > 0">{{ totalItems }}</span>
         </div>
       </q-toolbar>
@@ -30,7 +29,6 @@
           <q-alert v-if="alertaGrande" color="warning" icon="warning" dense>
             ⚠️ Compra grande: tu total supera los $1000. ¡Podrías obtener envío gratis!
           </q-alert>
-
           <q-alert v-if="guardado" color="positive" icon="save" dense>
             💾 Carrito guardado en localStorage
           </q-alert>
@@ -44,8 +42,16 @@
               <div class="text-h6 text-primary q-mb-md">Productos</div>
 
               <div v-for="(producto, index) in productos" :key="index" class="q-mb-md">
-                <q-card bordered class="q-pa-md row items-center justify-between">
+                <!-- 🌟 Efecto hover -->
+                <q-card
+                  bordered
+                  class="q-pa-md row items-center justify-between card-hover"
+                  :class="{ pulse: producto.animar }"
+                  @mouseover="producto.hover = true"
+                  @mouseleave="producto.hover = false"
+                >
 
+                  <!-- Emoji e info -->
                   <div class="row items-center q-gutter-md">
                     <div class="emoji text-h4">{{ producto.emoji }}</div>
                     <div>
@@ -54,21 +60,23 @@
                     </div>
                   </div>
 
-                  <div>
-                    <q-btn
-                      v-if="!producto.agregado"
-                      color="primary"
-                      label="Agregar al carrito"
-                      @click="agregarAlCarrito(producto)"
-                      glossy
-                    />
-                    <div v-else class="row items-center q-gutter-sm">
-                      <q-btn round dense color="negative" icon="remove" @click="disminuir(producto)" />
-                      <div class="text-body1 text-bold">{{ producto.cantidad }}</div>
-                      <q-btn round dense color="positive" icon="add" @click="aumentar(producto)" />
+                  <!-- Botones -->
+                  <transition name="fade">
+                    <div>
+                      <q-btn
+                        v-if="!producto.agregado"
+                        color="primary"
+                        label="Agregar al carrito"
+                        @click="agregarAlCarrito(producto)"
+                        glossy
+                      />
+                      <div v-else class="row items-center q-gutter-sm">
+                        <q-btn round dense color="negative" icon="remove" @click="disminuir(producto)" />
+                        <div class="text-body1 text-bold">{{ producto.cantidad }}</div>
+                        <q-btn round dense color="positive" icon="add" @click="aumentar(producto)" />
+                      </div>
                     </div>
-                  </div>
-
+                  </transition>
                 </q-card>
               </div>
             </q-card>
@@ -76,7 +84,7 @@
 
           <!-- 🧾 Resumen -->
           <div class="col-12 col-md-5">
-            <q-card bordered flat class="q-pa-lg">
+            <q-card bordered flat class="q-pa-lg resumen">
               <div class="text-h6 text-primary q-mb-sm">Resumen del Carrito</div>
               <q-separator spaced />
               <div><strong>Productos:</strong> {{ totalItems }} ítems</div>
@@ -87,7 +95,7 @@
                 Total a pagar: ${{ totalFinal.toFixed(2) }}
               </div>
               <div class="q-mt-md text-center">
-                <q-btn color="primary" icon="credit_card" label="Finalizar compra" size="lg" glossy :disable="totalItems === 0"/>
+                <q-btn color="primary" icon="credit_card" label="Finalizar compra" size="lg" glossy :disable="totalItems === 0" />
                 <q-btn color="negative" icon="delete" label="Vaciar carrito" flat class="q-mt-sm" @click="vaciarCarrito" :disable="totalItems === 0"/>
               </div>
             </q-card>
@@ -103,11 +111,11 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 const productos = ref([
-  { nombre: 'Smartphone Galaxy S25', precio: 1200, cantidad: 0, agregado: false, emoji: '📱' },
-  { nombre: 'Audífonos Bose', precio: 350, cantidad: 0, agregado: false, emoji: '🎧' },
-  { nombre: 'Tablet iPad Pro', precio: 999, cantidad: 0, agregado: false, emoji: '💻' },
-  { nombre: 'Smartwatch Apple', precio: 450, cantidad: 0, agregado: false, emoji: '⌚' },
-  { nombre: 'Cámara GoPro Hero12', precio: 499, cantidad: 0, agregado: false, emoji: '📸' }
+  { nombre: 'Smartphone Galaxy S25', precio: 1200, cantidad: 0, agregado: false, emoji: '📱', hover: false, animar: false },
+  { nombre: 'Audífonos Bose', precio: 350, cantidad: 0, agregado: false, emoji: '🎧', hover: false, animar: false },
+  { nombre: 'Tablet iPad Pro', precio: 999, cantidad: 0, agregado: false, emoji: '💻', hover: false, animar: false },
+  { nombre: 'Smartwatch Apple', precio: 450, cantidad: 0, agregado: false, emoji: '⌚', hover: false, animar: false },
+  { nombre: 'Cámara GoPro Hero12', precio: 499, cantidad: 0, agregado: false, emoji: '📸', hover: false, animar: false }
 ])
 
 const guardado = ref(false)
@@ -121,11 +129,13 @@ const totalFinal = computed(() => subtotal.value + impuesto.value)
 function agregarAlCarrito(producto) {
   producto.cantidad = 1
   producto.agregado = true
+  animar(producto)
   guardarCarrito()
 }
 
 function aumentar(producto) {
   producto.cantidad++
+  animar(producto)
   guardarCarrito()
 }
 
@@ -151,6 +161,11 @@ function guardarCarrito() {
   setTimeout(() => (guardado.value = false), 1500)
 }
 
+function animar(producto) {
+  producto.animar = true
+  setTimeout(() => (producto.animar = false), 300)
+}
+
 onMounted(() => {
   const guardadoCarrito = localStorage.getItem('carrito')
   if (guardadoCarrito) {
@@ -171,27 +186,41 @@ watch(totalFinal, nuevoTotal => {
 h1, h2, .text-h6
   font-family: "Inter", sans-serif
 
+/* ✨ Tarjetas de productos con efectos hover */
+.card-hover
+  transition: all 0.3s ease
+  cursor: pointer
+  &:hover
+    transform: translateY(-4px)
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15)
+    border-color: #9C27B0
+
+/* 💥 Efecto de pulso cuando se agrega */
+.pulse
+  animation: pulse 0.3s ease
+
+@keyframes pulse
+  0%
+    transform: scale(1)
+  50%
+    transform: scale(1.05)
+  100%
+    transform: scale(1)
+
+/* ❤️ Corazón con animación suave */
+.heart-anim
+  transition: transform 0.2s ease
+  &:hover
+    transform: scale(1.2)
+    color: #E040FB
+
+/* Fade para botones */
+.fade-enter-active, .fade-leave-active
+  transition: opacity 0.3s ease
+.fade-enter-from, .fade-leave-to
+  opacity: 0
+
 .emoji
   font-size: 2rem
-
-.heart-notify
-  position: relative
-  display: inline-block
-  q-icon
-    font-size: 2rem
-    color: #9C27B0
-  span
-    position: absolute
-    top: -5px
-    right: -5px
-    background-color: #000
-    color: #fff
-    font-size: 0.7rem
-    width: 1rem
-    height: 1rem
-    border-radius: 50%
-    display: flex
-    justify-content: center
-    align-items: center
 </style>
 
