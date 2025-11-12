@@ -123,3 +123,4 @@ watch(totalFinal, (nuevo) => {
 </style>
 
 
+
