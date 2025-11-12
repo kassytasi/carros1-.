@@ -8,7 +8,7 @@
           🛒 FuturoShop
         </q-toolbar-title>
 
-        <!-- ❤️ Corazón violeta con número de productos -->
+        <!-- ❤️ Corazón con notificación -->
         <div class="heart-notify q-ml-md">
           <q-icon name="favorite" size="xl"/>
           <span v-if="totalItems > 0">{{ totalItems }}</span>
@@ -16,7 +16,7 @@
       </q-toolbar>
     </q-header>
 
-    <!-- 🔹 Contenido principal -->
+    <!-- 🔹 Contenido -->
     <q-page-container>
       <q-page class="q-pa-xl bg-grey-2">
 
@@ -27,29 +27,18 @@
 
         <!-- 🔸 Alertas -->
         <div class="q-mb-md">
-          <q-alert
-            v-if="alertaGrande"
-            color="warning"
-            icon="warning"
-            class="q-mb-sm"
-            dense
-          >
+          <q-alert v-if="alertaGrande" color="warning" icon="warning" dense>
             ⚠️ Compra grande: tu total supera los $1000. ¡Podrías obtener envío gratis!
           </q-alert>
 
-          <q-alert
-            v-if="guardado"
-            color="positive"
-            icon="save"
-            dense
-          >
+          <q-alert v-if="guardado" color="positive" icon="save" dense>
             💾 Carrito guardado en localStorage
           </q-alert>
         </div>
 
         <!-- 🔸 Cuerpo -->
         <div class="row q-col-gutter-xl">
-          <!-- 🧱 Lista de productos -->
+          <!-- 🧱 Productos -->
           <div class="col-12 col-md-7">
             <q-card flat bordered class="q-pa-md">
               <div class="text-h6 text-primary q-mb-md">Productos</div>
@@ -57,13 +46,15 @@
               <div v-for="(producto, index) in productos" :key="index" class="q-mb-md">
                 <q-card bordered class="q-pa-md row items-center justify-between">
 
-                  <div>
-                    <div class="text-subtitle1 text-dark">{{ producto.nombre }}</div>
-                    <div class="text-bold text-positive">${{ producto.precio }}</div>
+                  <div class="row items-center q-gutter-md">
+                    <div class="emoji text-h4">{{ producto.emoji }}</div>
+                    <div>
+                      <div class="text-subtitle1 text-dark">{{ producto.nombre }}</div>
+                      <div class="text-bold text-positive">${{ producto.precio }}</div>
+                    </div>
                   </div>
 
                   <div>
-                    <!-- Mostrar "Agregar al carrito" si no está agregado -->
                     <q-btn
                       v-if="!producto.agregado"
                       color="primary"
@@ -71,24 +62,10 @@
                       @click="agregarAlCarrito(producto)"
                       glossy
                     />
-
-                    <!-- Botones + y - si ya fue agregado -->
                     <div v-else class="row items-center q-gutter-sm">
-                      <q-btn
-                        round
-                        dense
-                        color="negative"
-                        icon="remove"
-                        @click="disminuir(producto)"
-                      />
+                      <q-btn round dense color="negative" icon="remove" @click="disminuir(producto)" />
                       <div class="text-body1 text-bold">{{ producto.cantidad }}</div>
-                      <q-btn
-                        round
-                        dense
-                        color="positive"
-                        icon="add"
-                        @click="aumentar(producto)"
-                      />
+                      <q-btn round dense color="positive" icon="add" @click="aumentar(producto)" />
                     </div>
                   </div>
 
@@ -97,35 +74,26 @@
             </q-card>
           </div>
 
-          <!-- 🧾 Resumen lateral -->
+          <!-- 🧾 Resumen -->
           <div class="col-12 col-md-5">
             <q-card bordered flat class="q-pa-lg">
               <div class="text-h6 text-primary q-mb-sm">Resumen del Carrito</div>
               <q-separator spaced />
-
-              <div class="q-mb-sm"><strong>Productos:</strong> {{ totalItems }} ítems</div>
-              <div class="q-mb-sm"><strong>Subtotal:</strong> ${{ subtotal.toFixed(2) }}</div>
-              <div class="q-mb-sm"><strong>Impuesto (16%):</strong> ${{ impuesto.toFixed(2) }}</div>
+              <div><strong>Productos:</strong> {{ totalItems }} ítems</div>
+              <div><strong>Subtotal:</strong> ${{ subtotal.toFixed(2) }}</div>
+              <div><strong>Impuesto (16%):</strong> ${{ impuesto.toFixed(2) }}</div>
               <q-separator spaced />
-
               <div class="text-h6 text-positive text-bold q-mt-sm">
                 Total a pagar: ${{ totalFinal.toFixed(2) }}
               </div>
-
               <div class="q-mt-md text-center">
-                <q-btn
-                  color="primary"
-                  icon="credit_card"
-                  label="Finalizar compra"
-                  size="lg"
-                  glossy
-                  unelevated
-                  :disable="totalItems === 0"
-                />
+                <q-btn color="primary" icon="credit_card" label="Finalizar compra" size="lg" glossy :disable="totalItems === 0"/>
+                <q-btn color="negative" icon="delete" label="Vaciar carrito" flat class="q-mt-sm" @click="vaciarCarrito" :disable="totalItems === 0"/>
               </div>
             </q-card>
           </div>
         </div>
+
       </q-page>
     </q-page-container>
   </q-layout>
@@ -135,22 +103,18 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 const productos = ref([
-  { nombre: 'Smartphone Galaxy S25', precio: 1200, cantidad: 0, agregado: false },
-  { nombre: 'Audífonos Bose', precio: 350, cantidad: 0, agregado: false },
-  { nombre: 'Tablet iPad Pro', precio: 999, cantidad: 0, agregado: false },
-  { nombre: 'Smartwatch Apple', precio: 450, cantidad: 0, agregado: false },
-  { nombre: 'Cámara GoPro Hero12', precio: 499, cantidad: 0, agregado: false }
+  { nombre: 'Smartphone Galaxy S25', precio: 1200, cantidad: 0, agregado: false, emoji: '📱' },
+  { nombre: 'Audífonos Bose', precio: 350, cantidad: 0, agregado: false, emoji: '🎧' },
+  { nombre: 'Tablet iPad Pro', precio: 999, cantidad: 0, agregado: false, emoji: '💻' },
+  { nombre: 'Smartwatch Apple', precio: 450, cantidad: 0, agregado: false, emoji: '⌚' },
+  { nombre: 'Cámara GoPro Hero12', precio: 499, cantidad: 0, agregado: false, emoji: '📸' }
 ])
 
 const guardado = ref(false)
 const alertaGrande = ref(false)
 
-const totalItems = computed(() =>
-  productos.value.reduce((t, p) => t + p.cantidad, 0)
-)
-const subtotal = computed(() =>
-  productos.value.reduce((t, p) => t + p.precio * p.cantidad, 0)
-)
+const totalItems = computed(() => productos.value.reduce((t, p) => t + p.cantidad, 0))
+const subtotal = computed(() => productos.value.reduce((t, p) => t + p.precio * p.cantidad, 0))
 const impuesto = computed(() => subtotal.value * 0.16)
 const totalFinal = computed(() => subtotal.value + impuesto.value)
 
@@ -173,6 +137,14 @@ function disminuir(producto) {
   }
 }
 
+function vaciarCarrito() {
+  productos.value.forEach(p => {
+    p.cantidad = 0
+    p.agregado = false
+  })
+  guardarCarrito()
+}
+
 function guardarCarrito() {
   localStorage.setItem('carrito', JSON.stringify(productos.value))
   guardado.value = true
@@ -185,14 +157,12 @@ onMounted(() => {
     const parsed = JSON.parse(guardadoCarrito)
     productos.value = productos.value.map(p => {
       const saved = parsed.find(sp => sp.nombre === p.nombre)
-      return saved
-        ? { ...p, cantidad: saved.cantidad, agregado: saved.agregado }
-        : p
+      return saved ? { ...p, cantidad: saved.cantidad, agregado: saved.agregado } : p
     })
   }
 })
 
-watch(totalFinal, (nuevoTotal) => {
+watch(totalFinal, nuevoTotal => {
   alertaGrande.value = nuevoTotal > 1000
 })
 </script>
@@ -201,13 +171,15 @@ watch(totalFinal, (nuevoTotal) => {
 h1, h2, .text-h6
   font-family: "Inter", sans-serif
 
-/* Corazón tipo notificación */
+.emoji
+  font-size: 2rem
+
 .heart-notify
   position: relative
   display: inline-block
   q-icon
     font-size: 2rem
-    color: #9C27B0  // Violeta
+    color: #9C27B0
   span
     position: absolute
     top: -5px
@@ -222,3 +194,4 @@ h1, h2, .text-h6
     justify-content: center
     align-items: center
 </style>
+
