@@ -1,0 +1,224 @@
+<template>
+  <q-layout view="hHh lpR fFf">
+
+    <!-- 🔹 Barra superior -->
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar>
+        <q-toolbar-title class="text-h5">
+          🛒 FuturoShop
+        </q-toolbar-title>
+
+        <!-- ❤️ Corazón violeta con número de productos -->
+        <div class="heart-notify q-ml-md">
+          <q-icon name="favorite" size="xl"/>
+          <span v-if="totalItems > 0">{{ totalItems }}</span>
+        </div>
+      </q-toolbar>
+    </q-header>
+
+    <!-- 🔹 Contenido principal -->
+    <q-page-container>
+      <q-page class="q-pa-xl bg-grey-2">
+
+        <div class="text-center q-mb-lg">
+          <h1 class="text-h4 text-primary">Carrito de Compras</h1>
+          <p class="text-grey-7">Agrega productos y observa cómo los totales se actualizan automáticamente</p>
+        </div>
+
+        <!-- 🔸 Alertas -->
+        <div class="q-mb-md">
+          <q-alert
+            v-if="alertaGrande"
+            color="warning"
+            icon="warning"
+            class="q-mb-sm"
+            dense
+          >
+            ⚠️ Compra grande: tu total supera los $1000. ¡Podrías obtener envío gratis!
+          </q-alert>
+
+          <q-alert
+            v-if="guardado"
+            color="positive"
+            icon="save"
+            dense
+          >
+            💾 Carrito guardado en localStorage
+          </q-alert>
+        </div>
+
+        <!-- 🔸 Cuerpo -->
+        <div class="row q-col-gutter-xl">
+          <!-- 🧱 Lista de productos -->
+          <div class="col-12 col-md-7">
+            <q-card flat bordered class="q-pa-md">
+              <div class="text-h6 text-primary q-mb-md">Productos</div>
+
+              <div v-for="(producto, index) in productos" :key="index" class="q-mb-md">
+                <q-card bordered class="q-pa-md row items-center justify-between">
+
+                  <div>
+                    <div class="text-subtitle1 text-dark">{{ producto.nombre }}</div>
+                    <div class="text-bold text-positive">${{ producto.precio }}</div>
+                  </div>
+
+                  <div>
+                    <!-- Mostrar "Agregar al carrito" si no está agregado -->
+                    <q-btn
+                      v-if="!producto.agregado"
+                      color="primary"
+                      label="Agregar al carrito"
+                      @click="agregarAlCarrito(producto)"
+                      glossy
+                    />
+
+                    <!-- Botones + y - si ya fue agregado -->
+                    <div v-else class="row items-center q-gutter-sm">
+                      <q-btn
+                        round
+                        dense
+                        color="negative"
+                        icon="remove"
+                        @click="disminuir(producto)"
+                      />
+                      <div class="text-body1 text-bold">{{ producto.cantidad }}</div>
+                      <q-btn
+                        round
+                        dense
+                        color="positive"
+                        icon="add"
+                        @click="aumentar(producto)"
+                      />
+                    </div>
+                  </div>
+
+                </q-card>
+              </div>
+            </q-card>
+          </div>
+
+          <!-- 🧾 Resumen lateral -->
+          <div class="col-12 col-md-5">
+            <q-card bordered flat class="q-pa-lg">
+              <div class="text-h6 text-primary q-mb-sm">Resumen del Carrito</div>
+              <q-separator spaced />
+
+              <div class="q-mb-sm"><strong>Productos:</strong> {{ totalItems }} ítems</div>
+              <div class="q-mb-sm"><strong>Subtotal:</strong> ${{ subtotal.toFixed(2) }}</div>
+              <div class="q-mb-sm"><strong>Impuesto (16%):</strong> ${{ impuesto.toFixed(2) }}</div>
+              <q-separator spaced />
+
+              <div class="text-h6 text-positive text-bold q-mt-sm">
+                Total a pagar: ${{ totalFinal.toFixed(2) }}
+              </div>
+
+              <div class="q-mt-md text-center">
+                <q-btn
+                  color="primary"
+                  icon="credit_card"
+                  label="Finalizar compra"
+                  size="lg"
+                  glossy
+                  unelevated
+                  :disable="totalItems === 0"
+                />
+              </div>
+            </q-card>
+          </div>
+        </div>
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+
+const productos = ref([
+  { nombre: 'Smartphone Galaxy S25', precio: 1200, cantidad: 0, agregado: false },
+  { nombre: 'Audífonos Bose', precio: 350, cantidad: 0, agregado: false },
+  { nombre: 'Tablet iPad Pro', precio: 999, cantidad: 0, agregado: false },
+  { nombre: 'Smartwatch Apple', precio: 450, cantidad: 0, agregado: false },
+  { nombre: 'Cámara GoPro Hero12', precio: 499, cantidad: 0, agregado: false }
+])
+
+const guardado = ref(false)
+const alertaGrande = ref(false)
+
+const totalItems = computed(() =>
+  productos.value.reduce((t, p) => t + p.cantidad, 0)
+)
+const subtotal = computed(() =>
+  productos.value.reduce((t, p) => t + p.precio * p.cantidad, 0)
+)
+const impuesto = computed(() => subtotal.value * 0.16)
+const totalFinal = computed(() => subtotal.value + impuesto.value)
+
+function agregarAlCarrito(producto) {
+  producto.cantidad = 1
+  producto.agregado = true
+  guardarCarrito()
+}
+
+function aumentar(producto) {
+  producto.cantidad++
+  guardarCarrito()
+}
+
+function disminuir(producto) {
+  if (producto.cantidad > 0) {
+    producto.cantidad--
+    if (producto.cantidad === 0) producto.agregado = false
+    guardarCarrito()
+  }
+}
+
+function guardarCarrito() {
+  localStorage.setItem('carrito', JSON.stringify(productos.value))
+  guardado.value = true
+  setTimeout(() => (guardado.value = false), 1500)
+}
+
+onMounted(() => {
+  const guardadoCarrito = localStorage.getItem('carrito')
+  if (guardadoCarrito) {
+    const parsed = JSON.parse(guardadoCarrito)
+    productos.value = productos.value.map(p => {
+      const saved = parsed.find(sp => sp.nombre === p.nombre)
+      return saved
+        ? { ...p, cantidad: saved.cantidad, agregado: saved.agregado }
+        : p
+    })
+  }
+})
+
+watch(totalFinal, (nuevoTotal) => {
+  alertaGrande.value = nuevoTotal > 1000
+})
+</script>
+
+<style scoped lang="sass">
+h1, h2, .text-h6
+  font-family: "Inter", sans-serif
+
+/* Corazón tipo notificación */
+.heart-notify
+  position: relative
+  display: inline-block
+  q-icon
+    font-size: 2rem
+    color: #9C27B0  // Violeta
+  span
+    position: absolute
+    top: -5px
+    right: -5px
+    background-color: #000
+    color: #fff
+    font-size: 0.7rem
+    width: 1rem
+    height: 1rem
+    border-radius: 50%
+    display: flex
+    justify-content: center
+    align-items: center
+</style>
