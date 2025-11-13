@@ -376,7 +376,7 @@ const productos = ref([
     descuento: 31,
     cantidad: 0, 
     agregado: false, 
-    imagen: 'phoenix-vortex.png', 
+    imagen: 'phonevortex.png', 
     hover: false, 
     animar: false,
     descripcion: 'Unleash the Next Generation' 
@@ -388,7 +388,7 @@ const productos = ref([
     descuento: 24,
     cantidad: 0, 
     agregado: false, 
-    imagen: 'phoenix-flightboard.png', 
+    imagen: 'phonenix.png', 
     hover: false, 
     animar: false,
     descripcion: 'Defy Gravity' 
@@ -400,7 +400,7 @@ const productos = ref([
     descuento: 24,
     cantidad: 0, 
     agregado: false, 
-    imagen: 'phoenix-glidestep.png', 
+    imagen: 'glidestep.png', 
     hover: false, 
     animar: false,
     descripcion: 'Effortless Urban Motion' 
