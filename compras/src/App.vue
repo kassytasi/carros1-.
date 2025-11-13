@@ -1,29 +1,23 @@
 <template>
   <q-layout view="hHh lpR fFf">
-
+    <!-- 🔹 Header -->
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title class="text-h5 text-weight-bold">
           🛒 shopping
         </q-toolbar-title>
 
-    
+        <!-- ❤️ Corazón con animación -->
         <div class="heart-notify q-ml-md">
-          <q-icon 
-            :name="totalFavoritos > 0 ? 'favorite' : 'favorite_border'" 
-            size="xl" 
-            class="heart-anim" 
-            :class="{ 'text-pink': totalFavoritos > 0 }"
-          />
+          <q-icon name="favorite" size="xl" class="heart-anim" />
           <span v-if="totalItems > 0" class="badge">{{ totalItems }}</span>
-          <span v-if="totalFavoritos > 0" class="badge-favoritos">{{ totalFavoritos }}</span>
         </div>
       </q-toolbar>
     </q-header>
 
     <!-- 🔹 Contenido -->
     <q-page-container>
-      <q-page class="q-pa-md q-pa-xl--lg bg-grey-2">
+      <q-page class="q-pa-md q-pa-xl--lg bg-grey-2" style="overflow: hidden;">
 
         <div class="text-center q-mb-lg">
           <h1 class="text-h4 text-h3-lg text-primary text-weight-bold">Carrito de Compras</h1>
@@ -52,19 +46,13 @@
             </template>
             ✅ ¡Compra finalizada con éxito! Gracias por tu compra
           </q-banner>
-
-          <q-banner v-if="favoritoAgregado" class="bg-pink text-white">
-            <template v-slot:avatar>
-              <q-icon name="favorite" />
-            </template>
-            ❤️ Producto agregado a favoritos
-          </q-banner>
         </div>
 
+        <!-- 🔸 Cuerpo -->
         <div class="row q-col-gutter-lg q-col-gutter-xl-lg">
           <!-- 🧱 Productos -->
           <div class="col-12 col-md-7">
-            <q-card flat bordered class="q-pa-md card-productos">
+            <q-card flat bordered class="q-pa-md card-productos" style="max-height: 70vh; overflow-y: auto;">
               <q-card-section class="q-pb-none">
                 <div class="text-h6 text-primary text-weight-bold">Productos Disponibles</div>
                 <p class="text-grey-7 q-mt-sm">Selecciona los productos que deseas agregar a tu carrito</p>
@@ -96,21 +84,6 @@
                         <div class="text-subtitle2 text-subtitle1-md text-dark text-weight-medium">{{ producto.nombre }}</div>
                         <div class="text-caption text-body2-md text-grey-7 q-mb-xs">{{ producto.descripcion }}</div>
                         <div class="text-bold text-positive text-h6 text-h5-md">${{ producto.precio }}</div>
-                        
-                     
-                        <q-btn
-                          round
-                          dense
-                          :icon="producto.favorito ? 'favorite' : 'favorite_border'"
-                          :color="producto.favorito ? 'pink' : 'grey-6'"
-                          size="sm"
-                          class="q-mt-xs"
-                          @click="toggleFavorito(producto)"
-                        >
-                          <q-tooltip>
-                            {{ producto.favorito ? 'Quitar de favoritos' : 'Agregar a favoritos' }}
-                          </q-tooltip>
-                        </q-btn>
                       </div>
                     </div>
 
@@ -153,20 +126,14 @@
             </q-card>
           </div>
 
-       
+          <!-- 🧾 Resumen -->
           <div class="col-12 col-md-5">
             <q-card bordered flat class="q-pa-lg resumen">
               <!-- ❤️ Corazón en el resumen -->
               <div class="row items-center justify-center q-mb-md">
                 <div class="heart-notify-resumen">
-                  <q-icon 
-                    :name="totalFavoritos > 0 ? 'favorite' : 'favorite_border'" 
-                    size="xl" 
-                    class="heart-anim-resumen" 
-                    :class="{ 'text-pink': totalFavoritos > 0 }"
-                  />
+                  <q-icon name="favorite" size="xl" class="heart-anim-resumen" />
                   <span v-if="totalItems > 0" class="badge-resumen">{{ totalItems }}</span>
-                  <span v-if="totalFavoritos > 0" class="badge-favoritos-resumen">{{ totalFavoritos }}</span>
                 </div>
               </div>
               
@@ -175,7 +142,7 @@
               
               <q-separator spaced />
               
-            
+              <!-- 📊 Información organizada -->
               <div class="resumen-detalles">
                 <div class="row items-center justify-between q-mb-sm">
                   <span class="text-blue-grey-7 text-body2 text-body1-md text-weight-medium">TOTAL DE PRODUCTOS:</span>
@@ -187,32 +154,9 @@
                   <span class="text-bold text-deep-orange-8 text-body1 text-h6-md">${{ subtotal.toFixed(2) }}</span>
                 </div>
                 
-            
-                <div class="row items-center justify-between q-mb-sm">
-                  <span class="text-blue-grey-7 text-body2 text-body1-md text-weight-medium">ENVÍO:</span>
-                  <span v-if="envioGratis" class="text-bold text-positive text-body1 text-h6-md">
-                    GRATIS 🎉
-                  </span>
-                  <span v-else class="text-bold text-deep-orange-8 text-body1 text-h6-md">
-                    ${{ costoEnvio.toFixed(2) }}
-                  </span>
-                </div>
-
-              
-                <div v-if="!envioGratis && subtotal > 0" class="row items-center justify-between q-mb-sm">
-                  <span class="text-caption text-blue-grey-6 text-weight-medium">
-                    ¡Faltan ${{ (1000 - subtotal).toFixed(2) }} para envío gratis!
-                  </span>
-                </div>
-                
                 <div class="row items-center justify-between q-mb-sm">
                   <span class="text-blue-grey-7 text-body2 text-body1-md text-weight-medium">IMPUESTO (16%):</span>
                   <span class="text-bold text-amber-8 text-body1 text-h6-md">${{ impuesto.toFixed(2) }}</span>
-                </div>
-
-                <div class="row items-center justify-between q-mb-sm">
-                  <span class="text-blue-grey-7 text-body2 text-body1-md text-weight-medium">PRODUCTOS FAVORITOS:</span>
-                  <span class="text-bold text-pink text-body1 text-h6-md">{{ totalFavoritos }} ítems</span>
                 </div>
                 
                 <q-separator spaced class="q-my-md" />
@@ -239,19 +183,9 @@
                   :label="screen.lt.sm ? 'Vaciar' : 'Vaciar carrito'"
                   :size="screen.lt.sm ? 'md' : 'lg'"
                   flat 
-                  class="btn-vaciar-cool full-width q-mb-sm" 
+                  class="btn-vaciar-cool full-width" 
                   @click="vaciarCarrito" 
                   :disable="totalItems === 0"
-                />
-                <q-btn 
-                  icon="favorite" 
-                  :label="screen.lt.sm ? 'Favoritos' : 'Ver favoritos'"
-                  :size="screen.lt.sm ? 'md' : 'lg'"
-                  outline
-                  color="pink"
-                  class="full-width" 
-                  @click="verFavoritos"
-                  :disable="totalFavoritos === 0"
                 />
               </div>
             </q-card>
@@ -261,10 +195,10 @@
       </q-page>
     </q-page-container>
 
-   
+    <!-- 🖼️ Modal para vista ampliada de imágenes -->
     <q-dialog v-model="modalImagen" maximized>
       <q-card class="modal-imagen-card">
-        
+        <!-- Header del modal -->
         <q-bar class="bg-primary text-white modal-header">
           <div class="text-h6">{{ productoSeleccionado?.nombre }}</div>
           <q-space />
@@ -274,7 +208,7 @@
         </q-bar>
 
         <q-card-section class="q-pt-none modal-content">
-         
+          <!-- Imagen principal grande -->
           <div class="imagen-ampliada-container">
             <img 
               :src="getImageUrl(productoSeleccionado?.imagen)" 
@@ -284,7 +218,7 @@
             />
           </div>
 
-         
+          <!-- Miniaturas -->
           <div class="thumbnails-container q-mt-md">
             <div 
               v-for="(producto, index) in productos" 
@@ -306,7 +240,7 @@
             <div class="text-h5 text-weight-bold text-primary">{{ productoSeleccionado?.nombre }}</div>
             <div class="text-body1 text-grey-7 q-mb-sm">{{ productoSeleccionado?.descripcion }}</div>
             
-          
+            <!-- Precio y oferta -->
             <div class="precio-section">
               <div class="text-h4 text-weight-bold text-positive">${{ productoSeleccionado?.precio }}</div>
               <div class="text-caption text-grey-6 text-line-through" v-if="productoSeleccionado?.precioOriginal">
@@ -317,16 +251,11 @@
               </q-badge>
             </div>
 
-        
+            <!-- Detalles adicionales -->
             <div class="detalles-adicionales q-mt-md">
               <div class="row items-center q-mb-xs">
-                <q-icon name="local_shipping" :color="envioGratis ? 'positive' : 'grey-6'" class="q-mr-sm" />
-                <span v-if="envioGratis" class="text-body2 text-weight-medium text-positive">
-                  🎉 ¡Llega GRATIS mañana!
-                </span>
-                <span v-else class="text-body2 text-weight-medium">
-                  📦 Envío: ${{ costoEnvio.toFixed(2) }} (Compra ${{ (1000 - subtotal).toFixed(2) }} más para GRATIS)
-                </span>
+                <q-icon name="local_shipping" color="positive" class="q-mr-sm" />
+                <span class="text-body2 text-weight-medium">Llega gratis mañana</span>
               </div>
               <div class="row items-center q-mb-xs">
                 <q-icon name="assignment_return" color="info" class="q-mr-sm" />
@@ -338,7 +267,7 @@
               </div>
             </div>
 
-          
+            <!-- Botones de acción -->
             <div class="botones-modal q-mt-lg">
               <q-btn 
                 icon="add_shopping_cart" 
@@ -348,15 +277,6 @@
                 class="full-width q-mb-sm"
                 @click="agregarDesdeModal"
                 size="lg"
-              />
-              <q-btn 
-                :icon="productoSeleccionado?.favorito ? 'favorite' : 'favorite_border'" 
-                :label="productoSeleccionado?.favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'"
-                :color="productoSeleccionado?.favorito ? 'pink' : 'grey-7'"
-                outline
-                class="full-width"
-                size="lg"
-                @click="toggleFavoritoModal"
               />
             </div>
           </div>
@@ -376,13 +296,13 @@ const screen = $q.screen
 // 🔹 Variables reactivas para el modal
 const modalImagen = ref(false)
 const productoSeleccionado = ref(null)
-const favoritoAgregado = ref(false)
 
-
+// 🆕 Función para obtener la URL correcta de las imágenes
 const getImageUrl = (imageName) => {
   return new URL(`./assets/${imageName}`, import.meta.url).href
 }
 
+// 🆕 Función para manejar errores de imagen
 const handleImageError = (event) => {
   console.log('Error cargando imagen:', event.target.src)
   event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iOCIgZmlsbD0iI0Y1RjVGNSIvPgo8cGF0aCBkPSJNNDAgNDBDNDEuNjU2OSA0MCA0MyAzOC42NTY5IDQzIDM3QzQzIDM1LjM0MzEgNDEuNjU2OSAzNCA0MCAzNEMzOC4zNDMxIDM0IDM3IDM1LjM0MzEgMzcgMzdDMzcgMzguNjU2OSAzOC4zNDMxIDQwIDQwIDQwWiIgZmlsbD0iI0JEQkRCRCIvPgo8cGF0aCBkPSJNMzAgMjZINTBDNTEuMTA0NiAyNiA1MiAyNi44OTU0IDUyIDI4VjUyQzUyIDUzLjEwNDYgNTEuMTA0NiA1NCA1MCA1NEgzMEMyOC44OTU0IDU0IDI4IDUzLjEwNDYgMjggNTJWMjhDMjggMjYuODk1NCAyOC44OTU0IDI2IDMwIDI2WiIgZmlsbD0iI0JEQkRCRCIvPgo8L3N2Zz4K'
@@ -396,7 +316,6 @@ const productos = ref([
     descuento: 33,
     cantidad: 0, 
     agregado: false, 
-    favorito: false,
     imagen: 'celular.png', 
     hover: false, 
     animar: false,
@@ -409,7 +328,6 @@ const productos = ref([
     descuento: 50,
     cantidad: 0, 
     agregado: false, 
-    favorito: false,
     imagen: 'bose.png', 
     hover: false, 
     animar: false,
@@ -422,7 +340,6 @@ const productos = ref([
     descuento: 23,
     cantidad: 0, 
     agregado: false, 
-    favorito: false,
     imagen: 'table.png', 
     hover: false, 
     animar: false,
@@ -435,7 +352,6 @@ const productos = ref([
     descuento: 25,
     cantidad: 0, 
     agregado: false, 
-    favorito: false,
     imagen: 'apple.png', 
     hover: false, 
     animar: false,
@@ -448,11 +364,46 @@ const productos = ref([
     descuento: 23,
     cantidad: 0, 
     agregado: false, 
-    favorito: false,
     imagen: 'camara.png', 
     hover: false, 
     animar: false,
     descripcion: '4K 120fps, resistente al agua' 
+  },
+  { 
+    nombre: 'PHOENIX VORTEX', 
+    precio: 899, 
+    precioOriginal: 1299,
+    descuento: 31,
+    cantidad: 0, 
+    agregado: false, 
+    imagen: 'phoenix-vortex.png', 
+    hover: false, 
+    animar: false,
+    descripcion: 'Unleash the Next Generation' 
+  },
+  { 
+    nombre: 'PHOENIX FLIGHTBOARD', 
+    precio: 759, 
+    precioOriginal: 999,
+    descuento: 24,
+    cantidad: 0, 
+    agregado: false, 
+    imagen: 'phoenix-flightboard.png', 
+    hover: false, 
+    animar: false,
+    descripcion: 'Defy Gravity' 
+  },
+  { 
+    nombre: 'PHOENIX GLIDESTEP', 
+    precio: 649, 
+    precioOriginal: 849,
+    descuento: 24,
+    cantidad: 0, 
+    agregado: false, 
+    imagen: 'phoenix-glidestep.png', 
+    hover: false, 
+    animar: false,
+    descripcion: 'Effortless Urban Motion' 
   }
 ])
 
@@ -460,20 +411,12 @@ const guardado = ref(false)
 const alertaGrande = ref(false)
 const compraFinalizada = ref(false)
 
-
-const costoEnvio = ref(45) 
-const envioGratis = computed(() => subtotal.value >= 1000)
-
 const totalItems = computed(() => productos.value.reduce((t, p) => t + p.cantidad, 0))
-const totalFavoritos = computed(() => productos.value.filter(p => p.favorito).length)
 const subtotal = computed(() => productos.value.reduce((t, p) => t + p.precio * p.cantidad, 0))
 const impuesto = computed(() => subtotal.value * 0.16)
-const totalFinal = computed(() => {
-  const envio = envioGratis.value ? 0 : costoEnvio.value
-  return subtotal.value + impuesto.value + envio
-})
+const totalFinal = computed(() => subtotal.value + impuesto.value)
 
-
+// 🔹 Métodos para el visor de imágenes
 function abrirModalImagen(producto) {
   productoSeleccionado.value = producto
   modalImagen.value = true
@@ -487,42 +430,6 @@ function agregarDesdeModal() {
   if (productoSeleccionado.value) {
     agregarAlCarrito(productoSeleccionado.value)
     modalImagen.value = false
-  }
-}
-
-
-function toggleFavorito(producto) {
-  producto.favorito = !producto.favorito
-  mostrarAlertaFavorito(producto)
-  guardarCarrito()
-}
-
-function toggleFavoritoModal() {
-  if (productoSeleccionado.value) {
-    productoSeleccionado.value.favorito = !productoSeleccionado.value.favorito
-    mostrarAlertaFavorito(productoSeleccionado.value)
-    guardarCarrito()
-  }
-}
-
-function mostrarAlertaFavorito(producto) {
-  favoritoAgregado.value = true
-  setTimeout(() => {
-    favoritoAgregado.value = false
-  }, 2000)
-}
-
-function verFavoritos() {
-  const favoritos = productos.value.filter(p => p.favorito)
-  if (favoritos.length > 0) {
-    $q.dialog({
-      title: '❤️ Tus Productos Favoritos',
-      message: `Tienes ${favoritos.length} productos en favoritos:\n\n${favoritos.map(p => `• ${p.nombre} - $${p.precio}`).join('\n')}`,
-      ok: {
-        color: 'pink',
-        label: 'Cerrar'
-      }
-    })
   }
 }
 
@@ -585,7 +492,7 @@ onMounted(() => {
     const parsed = JSON.parse(guardadoCarrito)
     productos.value = productos.value.map(p => {
       const saved = parsed.find(sp => sp.nombre === p.nombre)
-      return saved ? { ...p, cantidad: saved.cantidad, agregado: saved.agregado, favorito: saved.favorito || false } : p
+      return saved ? { ...p, cantidad: saved.cantidad, agregado: saved.agregado } : p
     })
   }
 })
@@ -596,7 +503,8 @@ watch(totalFinal, nuevoTotal => {
 </script>
 
 <style scoped>
-.heart-notify, .heart-notify-resumen, .badge, .badge-resumen, .badge-favoritos, .badge-favoritos-resumen,
+/* 🔥 SOLUCIÓN AL PROBLEMA DE TEXTO FANTASMA */
+.heart-notify, .heart-notify-resumen, .badge, .badge-resumen,
 .q-card, .q-btn, .q-icon, .producto-imagen, .cantidad {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -604,6 +512,7 @@ watch(totalFinal, nuevoTotal => {
   user-select: none;
 }
 
+/* 🖼️ Estilos para las imágenes */
 .producto-imagen {
   width: 80px;
   height: 80px;
@@ -631,6 +540,7 @@ watch(totalFinal, nuevoTotal => {
   transform: scale(1.1);
 }
 
+/* Overlay para el efecto de zoom */
 .overlay {
   position: absolute;
   top: 0;
@@ -655,6 +565,7 @@ watch(totalFinal, nuevoTotal => {
   font-size: 24px;
 }
 
+/* ✨ Tarjetas de productos con efectos hover */
 .card-hover {
   transition: all 0.3s ease;
   cursor: pointer;
@@ -665,7 +576,7 @@ watch(totalFinal, nuevoTotal => {
   border-color: #9C27B0;
 }
 
-
+/* 💥 Efecto de pulso cuando se agrega */
 .pulse {
   animation: pulse 0.3s ease;
 }
@@ -676,7 +587,7 @@ watch(totalFinal, nuevoTotal => {
   100% { transform: scale(1); }
 }
 
-
+/* ❤️ Corazón con animación suave */
 .heart-anim {
   transition: transform 0.2s ease;
 }
@@ -694,14 +605,16 @@ watch(totalFinal, nuevoTotal => {
   color: #E040FB;
 }
 
+/* 🔸 ESTILOS ACTUALIZADOS */
 
+/* Contenedor de alertas apiladas */
 .alertas-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-
+/* Badge para el contador del carrito */
 .badge {
   background: linear-gradient(135deg, #FF4081, #E040FB);
   color: white;
@@ -734,52 +647,19 @@ watch(totalFinal, nuevoTotal => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-
-.badge-favoritos {
-  background: linear-gradient(135deg, #EC407A, #E91E63);
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  position: absolute;
-  top: -3px;
-  left: -3px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.badge-favoritos-resumen {
-  background: linear-gradient(135deg, #EC407A, #E91E63);
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  position: absolute;
-  top: -6px;
-  left: -6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
 .heart-notify, .heart-notify-resumen {
   position: relative;
   display: inline-block;
 }
 
-
+/* Marco de productos */
 .card-productos {
   border: 2px solid #2196F3 !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2) !important;
 }
 
-
+/* Marco de cada producto */
 .card-producto {
   border: 1px solid #E0E0E0 !important;
   border-radius: 8px !important;
@@ -792,6 +672,7 @@ watch(totalFinal, nuevoTotal => {
   background: linear-gradient(to right, #F3E5F5, #E1BEE7) !important;
 }
 
+/* 🔹 Botón Agregar en MORADO CLARO */
 .btn-agregar-morado {
   background: linear-gradient(135deg, #BA68C8, #9C27B0) !important;
   border-radius: 24px !important;
@@ -799,6 +680,7 @@ watch(totalFinal, nuevoTotal => {
   font-weight: bold !important;
 }
 
+/* 🆕 BOTONES COOL PARA FINALIZAR Y VACIAR */
 .btn-finalizar-cool {
   background: linear-gradient(135deg, #00E676, #00C853) !important;
   border-radius: 16px !important;
@@ -833,6 +715,7 @@ watch(totalFinal, nuevoTotal => {
   box-shadow: none !important;
 }
 
+/* Botones de cantidad */
 .btn-aumentar {
   background: linear-gradient(135deg, #4CAF50, #2E7D32) !important;
 }
@@ -841,6 +724,7 @@ watch(totalFinal, nuevoTotal => {
   background: linear-gradient(135deg, #F44336, #C62828) !important;
 }
 
+/* Marco del resumen */
 .resumen {
   border: 2px solid #9C27B0 !important;
   border-radius: 16px !important;
@@ -848,6 +732,7 @@ watch(totalFinal, nuevoTotal => {
   background: linear-gradient(to bottom, #FFFFFF, #F8F9FA) !important;
 }
 
+/* Resumen más organizado */
 .resumen-detalles {
   background: white;
   border-radius: 12px;
@@ -856,6 +741,7 @@ watch(totalFinal, nuevoTotal => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* Indicador de cantidad - EN NEGRO */
 .cantidad {
   background: linear-gradient(135deg, #000000, #424242) !important;
   color: white !important;
@@ -868,8 +754,9 @@ watch(totalFinal, nuevoTotal => {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
+/* 🖼️ Estilos para el modal de imágenes */
 .modal-imagen-card {
-  background: rgb(245, 242, 247);
+  background: white;
   max-width: 100vw;
   max-height: 100vh;
 }
@@ -890,7 +777,7 @@ watch(totalFinal, nuevoTotal => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ecf0f3, #d8dcdd);
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
@@ -903,6 +790,7 @@ watch(totalFinal, nuevoTotal => {
   border-radius: 8px;
 }
 
+/* Miniaturas */
 .thumbnails-container {
   display: flex;
   gap: 12px;
@@ -941,6 +829,7 @@ watch(totalFinal, nuevoTotal => {
   border-radius: 6px;
 }
 
+/* Información del producto */
 .producto-info {
   padding: 0 20px;
 }
@@ -967,6 +856,7 @@ watch(totalFinal, nuevoTotal => {
   margin-top: 20px;
 }
 
+/* 📱 RESPONSIVE ADJUSTMENTS */
 @media (max-width: 599px) {
   .producto-imagen {
     width: 60px;
